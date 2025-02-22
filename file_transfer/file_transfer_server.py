@@ -1,4 +1,5 @@
 import socket
+import struct
 
 def start_server(port):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -10,8 +11,11 @@ def start_server(port):
         client_socket, addr = server_socket.accept()
         print(f"\n[RECEIVING] Connection from {addr}")
 
-        # Receive the file name first
-        file_name = client_socket.recv(1024).decode('utf-8')
+        # Receive the file name length (first 4 bytes)
+        file_name_length = struct.unpack("I", client_socket.recv(4))[0]
+
+        # Receive the file name
+        file_name = client_socket.recv(file_name_length).decode('utf-8')
         print(f"[RECEIVING] File name: {file_name}")
 
         # Receive the file data
@@ -24,6 +28,3 @@ def start_server(port):
 
         print(f"[RECEIVED] File '{file_name}' has been successfully received.")
         client_socket.close()
-
-if __name__ == "__main__":
-    start_server(12345)
