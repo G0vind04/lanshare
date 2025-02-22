@@ -4,12 +4,14 @@ from threading import Thread
 from peer_discovery import PeerDiscovery
 from file_transfer_client import send_file
 from file_transfer_server import start_server
+import queue
+import time
 
 class FileTransferApp:
     def __init__(self, root):
         self.root = root
         self.root.title("File Transfer App")
-        self.root.geometry("600x500")
+        self.root.geometry("600x600")  # Increased height for transfer logs
         self.root.configure(padx=20, pady=20)
         
         # Style configuration
@@ -20,6 +22,9 @@ class FileTransferApp:
         
         self.peers = {}
         self.server_running = False
+        
+        # Queue for handling status updates
+        self.status_queue = queue.Queue()
 
         # Peer Discovery
         self.peer_discovery = PeerDiscovery()
@@ -35,6 +40,9 @@ class FileTransferApp:
 
         # Start server in a separate thread
         self.start_server_thread()
+        
+        # Start the status update checker
+        self.check_status_updates()
 
     def create_widgets(self):
         # Title
@@ -54,6 +62,19 @@ class FileTransferApp:
 
         file_frame = ttk.LabelFrame(self.main_frame, text="File Transfer", padding=10)
         file_frame.pack(fill=tk.X, pady=(0, 15))
+
+        # Transfer Log Section
+        transfer_frame = ttk.LabelFrame(self.main_frame, text="Transfer Status", padding=10)
+        transfer_frame.pack(fill=tk.BOTH, expand=True, pady=(0, 15))
+
+        # Add transfer log text widget
+        self.transfer_log = tk.Text(transfer_frame, height=8, wrap=tk.WORD)
+        self.transfer_log.pack(fill=tk.BOTH, expand=True)
+        
+        # Add scrollbar to transfer log
+        scrollbar = ttk.Scrollbar(transfer_frame, orient="vertical", command=self.transfer_log.yview)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+        self.transfer_log.configure(yscrollcommand=scrollbar.set)
 
         # Peer List Section
         self.peer_listbox = ttk.Treeview(
@@ -125,6 +146,24 @@ class FileTransferApp:
         )
         status_bar.pack(fill=tk.X, pady=(10, 0))
 
+    def add_transfer_log(self, message):
+        """Add a message to the transfer log with timestamp"""
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+        self.status_queue.put(f"[{timestamp}] {message}\n")
+
+    def check_status_updates(self):
+        """Check for status updates in the queue and update the GUI"""
+        try:
+            while True:
+                message = self.status_queue.get_nowait()
+                self.transfer_log.insert(tk.END, message)
+                self.transfer_log.see(tk.END)  # Auto-scroll to the bottom
+        except queue.Empty:
+            pass
+        finally:
+            # Schedule the next check
+            self.root.after(100, self.check_status_updates)
+
     def refresh_peers(self):
         self.peer_listbox.delete(*self.peer_listbox.get_children())
         self.peers = self.peer_discovery.peers
@@ -134,11 +173,13 @@ class FileTransferApp:
                 "end", 
                 values=(name, f"{info['address']}:{info['port']}")
             )
+        self.add_transfer_log("Peer list refreshed")
 
     def browse_file(self):
         file_path = filedialog.askopenfilename()
         if file_path:
             self.file_path_var.set(file_path)
+            self.add_transfer_log(f"Selected file: {file_path}")
 
     def send_file_gui(self):
         selected_item = self.peer_listbox.selection()
@@ -155,12 +196,15 @@ class FileTransferApp:
             messagebox.showerror("Error", "Please select a file.")
             return
 
-        Thread(target=send_file, args=(
-            peer_info["address"], 
-            peer_info["port"], 
-            file_path
-        )).start()
-        
+        def send_with_status():
+            try:
+                self.add_transfer_log(f"Starting file transfer to {peer_name}")
+                send_file(peer_info["address"], peer_info["port"], file_path)
+                self.add_transfer_log(f"File transfer completed successfully to {peer_name}")
+            except Exception as e:
+                self.add_transfer_log(f"Error during file transfer: {str(e)}")
+
+        Thread(target=send_with_status).start()
         self.status_var.set(f"Sending file to {peer_name}...")
 
     def add_peer_manually(self):
@@ -188,12 +232,20 @@ class FileTransferApp:
 
         self.ip_var.set("")
         self.port_var.set("")
+        self.add_transfer_log(f"Added new peer manually: {peer_name}")
         self.status_var.set(f"Added peer {peer_name} manually.")
 
     def start_server_thread(self):
         if not self.server_running:
-            Thread(target=start_server, args=(12345,), daemon=True).start()
+            def run_server_with_status():
+                def status_callback(message):
+                    self.add_transfer_log(message)
+                
+                start_server(12345, status_callback)
+
+            Thread(target=run_server_with_status, daemon=True).start()
             self.server_running = True
+            self.add_transfer_log("Server started and waiting for incoming files...")
             self.status_var.set("Server is running and waiting for incoming files...")
 
 if __name__ == "__main__":
