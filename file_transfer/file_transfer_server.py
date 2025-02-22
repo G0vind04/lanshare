@@ -1,5 +1,6 @@
 import socket
 import struct
+from tqdm import tqdm  # For progress bar
 
 def start_server(port):
     server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -18,13 +19,20 @@ def start_server(port):
         file_name = client_socket.recv(file_name_length).decode('utf-8')
         print(f"[RECEIVING] File name: {file_name}")
 
-        # Receive the file data
+        # Get the file size (optional, but useful for progress bar)
+        file_size = 0
         with open(file_name, 'wb') as f:
-            while True:
-                data = client_socket.recv(1024)
-                if not data:
-                    break
-                f.write(data)
+            with tqdm(unit='B', unit_scale=True, desc="Receiving") as pbar:
+                while True:
+                    data = client_socket.recv(1024)
+                    if not data:
+                        break
+                    f.write(data)
+                    pbar.update(len(data))  # Update the progress bar
+                    file_size += len(data)
 
-        print(f"[RECEIVED] File '{file_name}' has been successfully received.")
+        print(f"[RECEIVED] File '{file_name}' ({file_size} bytes) has been successfully received.")
         client_socket.close()
+
+if __name__ == "__main__":
+    start_server(12345)
