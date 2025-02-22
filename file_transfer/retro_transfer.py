@@ -2,19 +2,35 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk, simpledialog
 import threading
 import os
+import socket
 from tkinterdnd2 import DND_FILES, TkinterDnD
 from zeroconf import ServiceBrowser, Zeroconf
 
-# PeerDiscovery class
+def get_local_ip():
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        local_ip = s.getsockname()[0]
+        s.close()
+        return local_ip
+    except Exception:
+        return "127.0.0.1"
+
 class PeerDiscovery:
     def __init__(self):
         self.zeroconf = Zeroconf()
         self.peers = {}
 
     def register_service(self, name, port):
-        # Placeholder for service registration
-        # You'll need to implement this method based on your requirements
-        pass
+        from zeroconf import ServiceInfo
+        info = ServiceInfo(
+            "_filetransfer._tcp.local.",
+            f"{name}._filetransfer._tcp.local.",
+            addresses=[socket.inet_aton(get_local_ip())],
+            port=port,
+            properties={},
+        )
+        self.zeroconf.register_service(info)
 
     def discover_peers(self):
         class MyListener:
@@ -25,10 +41,10 @@ class PeerDiscovery:
                 info = zeroconf.get_service_info(type, name)
                 if info:
                     self.outer.peers[name] = {
-                        "address": info.parsed_addresses()[0],
+                        "address": socket.inet_ntoa(info.addresses[0]),
                         "port": info.port
                     }
-                    print(f"Discovered peer: {name} at {info.parsed_addresses()[0]}:{info.port}")
+                    print(f"Discovered peer: {name} at {socket.inet_ntoa(info.addresses[0])}:{info.port}")
 
             def remove_service(self, zeroconf, type, name):
                 if name in self.outer.peers:
@@ -36,7 +52,6 @@ class PeerDiscovery:
                     print(f"Peer removed: {name}")
 
             def update_service(self, zeroconf, type, name):
-                # This method is now provided to avoid the warning
                 pass
 
         browser = ServiceBrowser(self.zeroconf, "_filetransfer._tcp.local.", MyListener(self))
@@ -44,22 +59,59 @@ class PeerDiscovery:
     def __del__(self):
         self.zeroconf.close()
 
-# File transfer server and client functions (placeholders)
 def start_server(port, save_path, file_received_callback):
-    # Placeholder for server implementation
+    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server_socket.bind(('0.0.0.0', port))
+    server_socket.listen(5)
     print(f"Server started on port {port}, saving files to {save_path}")
 
-def send_file(address, port, file_path, progress_callback=None):
-    # Placeholder for file sending implementation
-    print(f"Sending file {file_path} to {address}:{port}")
-    # Simulate progress
-    for i in range(0, 101, 10):
-        if progress_callback:
-            progress_callback(i)
-        import time
-        time.sleep(0.5)
+    while True:
+        client_socket, address = server_socket.accept()
+        print(f"Connection from {address}")
+        
+        file_name = client_socket.recv(1024).decode()
+        file_path = os.path.join(save_path, file_name)
+        
+        file_size = int(client_socket.recv(1024).decode())
+        
+        with open(file_path, 'wb') as f:
+            bytes_received = 0
+            while bytes_received < file_size:
+                data = client_socket.recv(1024)
+                if not data:
+                    break
+                f.write(data)
+                bytes_received += len(data)
+        
+        print(f"File {file_name} received and saved to {file_path}")
+        file_received_callback(file_name)
+        client_socket.close()
 
-# Main GUI class
+def send_file(address, port, file_path, progress_callback=None):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.connect((address, port))
+        file_name = os.path.basename(file_path)
+        file_size = os.path.getsize(file_path)
+        
+        s.send(file_name.encode())
+        s.recv(1024)  # Wait for acknowledgement
+        
+        s.send(str(file_size).encode())
+        s.recv(1024)  # Wait for acknowledgement
+        
+        with open(file_path, 'rb') as f:
+            bytes_sent = 0
+            while bytes_sent < file_size:
+                chunk = f.read(1024)
+                if not chunk:
+                    break
+                s.send(chunk)
+                bytes_sent += len(chunk)
+                if progress_callback:
+                    progress_callback((bytes_sent / file_size) * 100)
+    
+    print(f"File {file_name} sent successfully")
+
 class ModernFileTransferGUI:
     def __init__(self, root):
         self.root = root
@@ -70,6 +122,10 @@ class ModernFileTransferGUI:
         self.peers = {}
         self.is_receiving = tk.BooleanVar(value=False)
         self.received_files_path = tk.StringVar(value=os.path.expanduser("~"))
+
+        self.local_ip = get_local_ip()
+        self.ip_label = None
+        self.peers_listbox = None
 
         self.discovery = PeerDiscovery()
         self.discovery.register_service("MyDevice", 12345)
@@ -118,6 +174,12 @@ class ModernFileTransferGUI:
                                  pady=8,
                                  command=self.add_peer)
         add_peer_btn.pack(side=tk.RIGHT)
+
+        self.ip_label = tk.Label(self.root, text=f"Your IP: {self.local_ip}", font=("Segoe UI", 10), bg="white")
+        self.ip_label.pack(pady=5)
+
+        self.peers_listbox = tk.Listbox(self.root, font=("Segoe UI", 10), bg="white", width=50)
+        self.peers_listbox.pack(pady=5)
 
         self.create_drop_zone()
 
@@ -202,8 +264,9 @@ class ModernFileTransferGUI:
             self.refresh_peers()
 
     def refresh_peers(self):
-        # Placeholder for refreshing the list of peers
-        pass
+        self.peers_listbox.delete(0, tk.END)
+        for name, info in self.peers.items():
+            self.peers_listbox.insert(tk.END, f"{name}: {info['address']}:{info['port']}")
 
     def select_files(self, event=None):
         files = filedialog.askopenfilenames()
@@ -223,9 +286,6 @@ class ModernFileTransferGUI:
 
     def transfer_file(self, peer_info, file_path):
         try:
-            total_size = os.path.getsize(file_path)
-            sent_size = 0
-
             def update_progress(progress):
                 self.root.after(0, lambda: self.progress.config(value=progress))
 
@@ -253,7 +313,6 @@ class ModernFileTransferGUI:
             f"Received file: {file_name}",
             icon="info"))
 
-# Helper method to create rounded rectangles
 def create_rounded_rectangle(self, x1, y1, x2, y2, radius, **kwargs):
     points = [x1 + radius, y1,
               x2 - radius, y1,
@@ -269,7 +328,6 @@ def create_rounded_rectangle(self, x1, y1, x2, y2, radius, **kwargs):
               x1, y1]
     return self.create_polygon(points, **kwargs, smooth=True)
 
-# Add the rounded rectangle method to Canvas
 tk.Canvas.create_rounded_rectangle = create_rounded_rectangle
 
 if __name__ == "__main__":
