@@ -34,24 +34,40 @@ class FileTransferApp:
         self.refresh_button = tk.Button(self.root, text="Refresh Peers", command=self.refresh_peers)
         self.refresh_button.grid(row=2, column=0, padx=10, pady=5, sticky="ew")
 
+        # Add Peer Manually Section
+        self.add_peer_label = tk.Label(self.root, text="Add Peer Manually:")
+        self.add_peer_label.grid(row=3, column=0, padx=10, pady=5, sticky="w")
+
+        self.ip_var = tk.StringVar()
+        self.port_var = tk.IntVar()
+
+        self.ip_entry = tk.Entry(self.root, textvariable=self.ip_var, width=20)
+        self.ip_entry.grid(row=4, column=0, padx=10, pady=5, sticky="w")
+
+        self.port_entry = tk.Entry(self.root, textvariable=self.port_var, width=10)
+        self.port_entry.grid(row=4, column=1, padx=10, pady=5, sticky="w")
+
+        self.add_peer_button = tk.Button(self.root, text="Add Peer", command=self.add_peer_manually)
+        self.add_peer_button.grid(row=4, column=2, padx=10, pady=5, sticky="ew")
+
         # Send File Section
         self.send_file_label = tk.Label(self.root, text="Send File:")
-        self.send_file_label.grid(row=0, column=1, padx=10, pady=5, sticky="w")
+        self.send_file_label.grid(row=5, column=0, padx=10, pady=5, sticky="w")
 
         self.file_path_var = tk.StringVar()
         self.file_path_entry = tk.Entry(self.root, textvariable=self.file_path_var, width=40)
-        self.file_path_entry.grid(row=1, column=1, padx=10, pady=5, sticky="ew")
+        self.file_path_entry.grid(row=6, column=0, padx=10, pady=5, sticky="ew")
 
         self.browse_button = tk.Button(self.root, text="Browse", command=self.browse_file)
-        self.browse_button.grid(row=1, column=2, padx=5, pady=5)
+        self.browse_button.grid(row=6, column=1, padx=5, pady=5)
 
         self.send_button = tk.Button(self.root, text="Send", command=self.send_file_gui)
-        self.send_button.grid(row=2, column=1, padx=10, pady=5, sticky="ew")
+        self.send_button.grid(row=6, column=2, padx=10, pady=5, sticky="ew")
 
         # Status Bar
         self.status_var = tk.StringVar()
         self.status_bar = tk.Label(self.root, textvariable=self.status_var, relief=tk.SUNKEN, anchor="w")
-        self.status_bar.grid(row=3, column=0, columnspan=3, sticky="ew")
+        self.status_bar.grid(row=7, column=0, columnspan=3, sticky="ew")
 
     def refresh_peers(self):
         self.peer_listbox.delete(0, tk.END)
@@ -83,6 +99,27 @@ class FileTransferApp:
         # Run file sending in a separate thread
         Thread(target=send_file, args=(ip, port, file_path)).start()
         self.status_var.set(f"Sending file to {selected_peer_name}...")
+
+    def add_peer_manually(self):
+        ip = self.ip_var.get()
+        port = self.port_var.get()
+
+        if not ip or not port:
+            messagebox.showerror("Error", "Please enter both IP and port.")
+            return
+
+        # Generate a unique name for the manual peer (e.g., "ManualPeer-IP:Port")
+        peer_name = f"ManualPeer-{ip}:{port}"
+
+        # Add the peer to the list
+        self.peers[peer_name] = {"address": ip, "port": port}
+        self.peer_listbox.insert(tk.END, f"{peer_name} ({ip}:{port})")
+
+        # Clear the input fields
+        self.ip_var.set("")
+        self.port_var.set("")
+
+        self.status_var.set(f"Added peer {peer_name} manually.")
 
     def start_server_thread(self):
         if not self.server_running:
