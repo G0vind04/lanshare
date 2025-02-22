@@ -9,13 +9,20 @@ def start_server(port):
     while True:
         client_socket, addr = server_socket.accept()
         print(f"\n[RECEIVING] Connection from {addr}")
-        with open('received_file', 'wb') as f:
+
+        # Receive the file name first
+        file_name = client_socket.recv(1024).decode('utf-8')
+        print(f"[RECEIVING] File name: {file_name}")
+
+        # Receive the file data
+        with open(file_name, 'wb') as f:
             while True:
                 data = client_socket.recv(1024)
                 if not data:
                     break
                 f.write(data)
-        print("[RECEIVED] File has been successfully received.")
+
+        print(f"[RECEIVED] File '{file_name}' has been successfully received.")
         client_socket.close()
 
 if __name__ == "__main__":

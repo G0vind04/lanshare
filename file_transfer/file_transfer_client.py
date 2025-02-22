@@ -1,10 +1,16 @@
 import socket
+import os
 
 def send_file(ip, port, file_path):
     client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     client_socket.connect((ip, port))
     print(f"[SENDING] Connected to {ip}:{port}. Sending file...")
 
+    # Send the file name first
+    file_name = os.path.basename(file_path)
+    client_socket.send(file_name.encode('utf-8'))
+
+    # Send the file data
     with open(file_path, 'rb') as f:
         while True:
             bytes_read = f.read(1024)
@@ -12,7 +18,7 @@ def send_file(ip, port, file_path):
                 break
             client_socket.sendall(bytes_read)
 
-    print("[SENT] File has been successfully sent.")
+    print(f"[SENT] File '{file_name}' has been successfully sent.")
     client_socket.close()
 
 if __name__ == "__main__":
