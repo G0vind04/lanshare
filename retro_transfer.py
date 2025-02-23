@@ -11,18 +11,21 @@ import pyperclip  # Add pyperclip for clipboard operations
 class FileTransferApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("File Transfer App")
+        self.root.title("LanSher")
         self.root.geometry("600x600")  # Increased height for transfer logs
         self.root.configure(padx=20, pady=20)
+
+        self.set_app_icon()
         
         # Style configuration
         self.style = ttk.Style()
-        self.style.configure("Title.TLabel", font=("Helvetica", 16, "bold"))
-        self.style.configure("Section.TLabel", font=("Helvetica", 12, "bold"))
-        self.style.configure("Status.TLabel", font=("Helvetica", 10, "italic"))
+        self.style.configure("Title.TLabel", font=("Courier Prime", 20, "bold"))
+        self.style.configure("Section.TLabel", font=("Courier Prime", 12, "bold"))
+        self.style.configure("Status.TLabel", font=("Courier Prime", 10, "italic"))
         
         self.peers = {}
         self.server_running = False
+        
         
         # Queue for handling status updates
         self.status_queue = queue.Queue()
@@ -40,12 +43,21 @@ class FileTransferApp:
         
         # Start the status update checker
         self.check_status_updates()
+    
+    def set_app_icon(self):
+        """Set the app icon from the given file path."""
+        try:
+            icon = tk.PhotoImage(file=r"assets\lion.png")
+            self.root.iconphoto(False, icon)
+        except Exception as e:
+            messagebox.showwarning("Icon Loading Error", f"Unable to load icon: {e}")
+
 
     def create_widgets(self):
         # Title
         title_label = ttk.Label(
             self.main_frame, 
-            text="File Transfer Application", 
+            text="LanSher", 
             style="Title.TLabel"
         )
         title_label.pack(pady=(0, 20))
