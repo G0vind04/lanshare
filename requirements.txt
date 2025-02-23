@@ -2,7 +2,20 @@ ifaddr==0.2.0
 keyboard==0.13.5
 pip==25.0
 zeroconf==0.145.1
-<<<<<<< HEAD
-=======
+keyboard
+pyperclip
+pyperclip3
+pyperclip3-legacy
+pyperclip-legacy
+pyperclip-ng
+pyperclip-x
+pyperclip3-ng
+socket
+struct
 tqdm
->>>>>>> 768c010e35088049bc123f58d38b554f74837c67
+tkinter
+zeroconf
+threading
+pyinstaller
+queue
+time
