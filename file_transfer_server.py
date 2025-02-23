@@ -79,7 +79,8 @@ def start_server(port, status_callback=None):
                 # Convert received bytes to text
                 received_text = received_data.decode('utf-8')
                 
-                message = f"[RECEIVED] Text message ({len(received_data)} bytes)"
+                # Update the status with the actual received text
+                message = f"[RECEIVED] Text message: {received_text}"
                 if status_callback:
                     status_callback(message)
                 print(message)
@@ -91,7 +92,7 @@ def start_server(port, status_callback=None):
                     messagebox.showinfo("Text Received", received_text)
                     root.destroy()
                 
-                # Show popup in the main GUI thread using after() to avoid blocking
+                # Show popup in the main thread
                 if status_callback:
                     root = tk.Tk()
                     root.after(100, lambda: messagebox.showinfo("Text Received", received_text))
