@@ -17,7 +17,7 @@ LanSher is a **LAN-based tool** for **hackathons and coding competitions**, enab
 ### Prerequisites
 Ensure you have Python installed. Then, install the required dependencies:
 ```bash
-pip install zeroconf
+pip install -r requirements.txt
 ```
 
 ## Running the Application
