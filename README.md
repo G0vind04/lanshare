@@ -35,7 +35,7 @@ python retro_transfer.py
 6. The file will be transferred instantly.
 
 ## License
-This project is open-source and available under the [MIT License]().
+This project is open-source and available under the [MIT License](https://github.com/G0vind04/lanshare/blob/main/LICENCE.md).
 
 ## Contributors
 Developed by [Aaqil Fazil](https://github.com/kidobop) and [Govind Mohan](https://github.com/g0vind04). Feel free to contribute and improve the project!
