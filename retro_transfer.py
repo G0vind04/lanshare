@@ -58,15 +58,21 @@ class FileTransferApp:
         file_frame = ttk.LabelFrame(self.main_frame, text="File Transfer", padding=10)
         file_frame.pack(fill=tk.X, pady=(0, 15))
         
-        # Clipboard Text Section (new feature)
+        # Clipboard Text Section (updated with clear button)
         clipboard_frame = ttk.LabelFrame(self.main_frame, text="Clipboard Text Transfer", padding=10)
         clipboard_frame.pack(fill=tk.X, pady=(0, 15))
         
         self.clipboard_text = tk.Text(clipboard_frame, height=4, wrap=tk.WORD)
         self.clipboard_text.pack(fill=tk.BOTH, expand=True)
         
-        clipboard_send_button = ttk.Button(clipboard_frame, text="Send Clipboard Text", command=self.send_clipboard_text)
-        clipboard_send_button.pack(pady=5)
+        clipboard_buttons_frame = ttk.Frame(clipboard_frame)
+        clipboard_buttons_frame.pack(fill=tk.X, pady=5)
+        
+        clipboard_send_button = ttk.Button(clipboard_buttons_frame, text="Send Clipboard Text", command=self.send_clipboard_text)
+        clipboard_send_button.pack(side=tk.LEFT, padx=5)
+        
+        clipboard_clear_button = ttk.Button(clipboard_buttons_frame, text="Clear Text", command=self.clear_clipboard_text)
+        clipboard_clear_button.pack(side=tk.LEFT, padx=5)
         
         # Transfer Log Section
         transfer_frame = ttk.LabelFrame(self.main_frame, text="Transfer Status", padding=10)
@@ -131,6 +137,10 @@ class FileTransferApp:
         status_bar = ttk.Label(self.main_frame, textvariable=self.status_var, style="Status.TLabel")
         status_bar.pack(fill=tk.X, pady=(10, 0))
 
+    def clear_clipboard_text(self):
+        """Clear the clipboard text box"""
+        self.clipboard_text.delete(1.0, tk.END)
+
     def send_clipboard_text(self):
         selected_item = self.peer_listbox.selection()
         if not selected_item:
@@ -157,10 +167,20 @@ class FileTransferApp:
         Thread(target=send_with_status).start()
         self.status_var.set(f"Sending clipboard text to {peer_name}...")
 
+    def update_clipboard_text(self, text):
+        """Update the clipboard text box with received text"""
+        self.clipboard_text.delete(1.0, tk.END)
+        self.clipboard_text.insert(tk.END, text)
+
     def add_transfer_log(self, message):
         """Add a message to the transfer log with timestamp"""
         timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
         self.status_queue.put(f"[{timestamp}] {message}\n")
+        
+        # Check if the message contains received text and update clipboard box
+        if "[RECEIVED] Text message: " in message:
+            received_text = message.split("[RECEIVED] Text message: ")[1]
+            self.root.after(0, lambda: self.update_clipboard_text(received_text))
 
     def check_status_updates(self):
         """Check for status updates in the queue and update the GUI"""
