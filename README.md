@@ -2,6 +2,9 @@
 
 **LanSher** combines **LAN** (networking) with **Sher** (lion in Hindi), symbolizing **strength, speed, and dominance** in LAN data transfer.
 
+## Motivation
+LanSher is a **LAN-based tool** for **hackathons and coding competitions**, enabling instant **text, code, and file sharing** without the internet. With **real-time peer discovery, high-speed transfers, and drag-and-drop text sharing**, collaboration becomes seamless. 🚀
+
 ## Key Features
 - 📡 **Peer Discovery** – Automatically detects other LanSher users in the network.
 - ⚡ **Fast Transfers** – Direct, high-speed data sharing without external servers.
@@ -9,9 +12,6 @@
 - 📂 **File & Text Sharing** – Send files or text messages instantly between connected devices.
 - 🖥️ **Cross-Platform** – Works on multiple operating systems within a LAN environment.
 - 🖱️ **Drag & Drop Support** – Quickly share text with an intuitive drag-and-drop interface.
-
-## Motivation
-LanSher is a **LAN-based tool** for **hackathons and coding competitions**, enabling instant **text, code, and file sharing** without the internet. With **real-time peer discovery, high-speed transfers, and drag-and-drop text sharing**, collaboration becomes seamless. 🚀
 
 ## Installation
 ### Prerequisites
