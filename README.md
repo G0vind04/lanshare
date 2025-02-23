@@ -1,16 +1,17 @@
-# LANSHARE - P2P File Transfer
+# LanSher 🦁⚡ 
 
-## Overview
-LANSHARE P2P File Transfer is a simple, lightweight peer-to-peer file sharing application with a retro-themed GUI. It allows users to:
-- Discover peers on the same local network
-- Drag and drop files to send to selected peers
-- Receive files seamlessly in the background
+**LanSher** combines **LAN** (networking) with **Sher** (lion in Hindi), symbolizing **strength, speed, and dominance** in LAN data transfer.
 
-## Features
-- **Peer Discovery**: Uses Zeroconf to find other users on the same network.
-- **Drag-and-Drop Support**: Quickly select files for transfer.
-- **File Reception**: Runs a background server to receive incoming files.
-- **Retro-Themed UI**: Classic interface with green text and a nostalgic feel.
+## Motivation
+LanSher is a **LAN-based tool** for **hackathons and coding competitions**, enabling instant **text, code, and file sharing** without the internet. With **real-time peer discovery, high-speed transfers, and drag-and-drop text sharing**, collaboration becomes seamless. 🚀
+
+## Key Features
+- 📡 **Peer Discovery** – Automatically detects other LanSher users in the network.
+- ⚡ **Fast Transfers** – Direct, high-speed data sharing without external servers.
+- 🔒 **Secure & Private** – No internet dependency, ensuring local-only transfers.
+- 📂 **File & Text Sharing** – Send files or text messages instantly between connected devices.
+- 🖥️ **Cross-Platform** – Works on multiple operating systems within a LAN environment.
+- 🖱️ **Drag & Drop Support** – Quickly share text with an intuitive drag-and-drop interface.
 
 ## Installation
 ### Prerequisites
@@ -22,24 +23,20 @@ pip install zeroconf
 ## Running the Application
 To start the application, run:
 ```bash
-python gui_app.py
+python retro_transfer.py
 ```
 
 ## How to Use
 1. Launch the application.
-2. Wait for peers to appear in the discovered peers list.
-3. Drag and drop a file onto the interface or use the "Select File" button.
-4. Select a peer from the list and click "Send File."
-5. The file will be transferred instantly.
-
-## Future Enhancements
-- Progress indicators for file transfers.
-- End-to-end encryption for security.
-- Cross-platform support for macOS and Linux.
+2. Click on "Refresh Peers" to view your IP address.
+3. Enter the receiver's IP address and the Port as "12345".
+4. Enter the text to send into the clipboard or browse the files to send.
+5. Select a peer from the list and click "Send File".
+6. The file will be transferred instantly.
 
 ## License
-This project is open-source and available under the MIT License.
+This project is open-source and available under the [MIT License](https://github.com/G0vind04/lanshare/blob/main/LICENCE.md).
 
 ## Contributors
-Developed by  <a href="https://github.com/kidobop" target="_blank">Aaqil Fazil </a>and <a href="https://github.com/g0vind04" target="_blank">Govind Mohan</a> . Feel free to contribute and improve the project!
+Developed by [Aaqil Fazil](https://github.com/kidobop) and [Govind Mohan](https://github.com/g0vind04). Feel free to contribute and improve the project!
 
