@@ -91,11 +91,11 @@ def start_server(port, status_callback=None):
                     messagebox.showinfo("Text Received", received_text)
                     root.destroy()
                 
-                # If we're running in the main thread (with GUI)
+                # Show popup in the main GUI thread using after() to avoid blocking
                 if status_callback:
                     root = tk.Tk()
                     root.after(100, lambda: messagebox.showinfo("Text Received", received_text))
-                    root.withdraw()
+                    root.withdraw()  # Hide the main window to only show the popup
                 
         except Exception as e:
             error_message = f"[ERROR] An error occurred while receiving: {str(e)}"

@@ -1,7 +1,7 @@
 import socket
 import os
 import struct
-from tqdm import tqdm  # For progress bar
+from tqdm import tqdm
 
 def send_file(ip, port, data):
     """
@@ -58,7 +58,7 @@ def send_file(ip, port, data):
             # Send text size
             client_socket.send(struct.pack("I", text_size))
             
-            # Send text data with progress bar
+            # Send text data with a progress bar
             print(f"[SENDING] Connected to {ip}:{port}. Sending text...")
             with tqdm(total=text_size, unit='B', unit_scale=True, desc="Sending") as pbar:
                 start = 0
@@ -78,4 +78,5 @@ def send_file(ip, port, data):
         client_socket.close()
 
 if __name__ == "__main__":
-    send_file('192.168.1.10', 12345, 'path_to_your_file')
+    # Test send file with text clipboard content
+    send_file('192.168.1.10', 12345, "This is the clipboard text to send!")
