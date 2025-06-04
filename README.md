@@ -3,21 +3,20 @@
 **LanSher** combines **LAN** (networking) with **Sher** (lion in Hindi), symbolizing **strength, speed, and dominance** in LAN data transfer.
 
 ## Motivation
-LanSher is a **LAN-based tool** for **hackathons and coding competitions**, enabling instant **text, code, and file sharing** without the internet. With **real-time peer discovery, high-speed transfers, and drag-and-drop text sharing**, collaboration becomes seamless. 🚀
+LanSher was born during a hackathon when sharing text and code through WhatsApp and online clipboards felt inefficient. Remembering our college lessons, we explored Python sockets—and what started as a quick fix soon became a powerful peer-to-peer transfer tool.
 
 ## Key Features
-- 📡 **Peer Discovery** – Automatically detects other LanSher users in the network.
 - ⚡ **Fast Transfers** – Direct, high-speed data sharing without external servers.
 - 🔒 **Secure & Private** – No internet dependency, ensuring local-only transfers.
 - 📂 **File & Text Sharing** – Send files or text messages instantly between connected devices.
-- 🖥️ **Cross-Platform** – Works on multiple operating systems within a LAN environment.
+- 🖥️ **Cross-Platform** – Works on multiple operating systems within a LAN environment. Tried and Tested in Windows (only).
 - 🖱️ **Drag & Drop Support** – Quickly share text with an intuitive drag-and-drop interface.
 
 ## Installation
 ### Prerequisites
 Ensure you have Python installed. Then, install the required dependencies:
 ```bash
-pip install zeroconf
+pip install -r requirements.txt
 ```
 
 ## Running the Application
